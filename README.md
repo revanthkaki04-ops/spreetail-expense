@@ -1,52 +1,71 @@
 # Spreetail Shared Expenses App
 
-A modern, high-performance shared expenses application designed to ingest and parse a messy flat expense export (`expenses_export.csv`), interactively resolve data anomalies (at least 14 categories detected), track group memberships over time, compute precise balances, and simplify debt settlements.
+A full-stack, responsive web application for managing shared expenses, built with a custom Node.js/Express backend and an optimized SQLite database. This application features a highly secure, XSS-fortified "Fintech" UI and a robust CSV Data Import Pipeline.
 
-## Key Features
+## 🚀 Key Engineering Features
 
-1. **User Authentication**: Secure Login & Registration module using JSON Web Tokens (JWT) and bcrypt password hashing. Access default profiles (Aisha, Rohan, Priya, Meera, Sam, Dev) using email `<name>@flat.com` (e.g. `aisha@flat.com`) and password `password123`.
-2. **Membership Timeline Manager**: Enforce start and end dates for group members. This ensures Sam is not billed for March utilities and Meera is not charged after she moves out.
-3. **Advanced CSV Importer**: Pre-scan the export file, highlight anomalies (duplicates, typos, out-of-bound dates, multi-currency, missing payers), and offer a GUI to review, correct, or skip rows.
-4. **Transparent Ledger**: Rohan's "No Magic Numbers" view showing every item contributing to a user's balance.
-5. **Optimized Debt Settlement**: Aisha's "Who Pays Whom" view using a transaction minimization algorithm.
-6. **Relational Database**: Stored in a local, self-contained SQLite database.
-
----
-
-## Setup & Running Instructions
-
-### Prerequisites
-- Node.js (v18.0.0 or higher recommended, tested on v24.16.0)
-- npm (v9.0.0 or higher recommended)
-
-### 1. Install Dependencies
-In the root directory, run:
-```bash
-npm install
-```
-
-### 2. Start the Application
-Run the local dev server:
-```bash
-npm start
-```
-The server will initialize a local `database.db` and start listening on [http://localhost:3000](http://localhost:3000).
-
-### 3. Running Automated Tests
-To run the automated integration tests which assert the correctness of all 14 anomaly checks and balance math:
-```bash
-npm test
-```
+1. **Greedy Debt Simplification Algorithm:** 
+   Implements an optimized algorithm to minimize the total number of transactions required to settle debts among group members. Instead of everyone paying each other back incrementally, the system calculates the most efficient payment graph (e.g., if A owes B $10 and B owes C $10, A simply pays C $10).
+2. **Robust CSV Import Pipeline:**
+   Instead of using bloated third-party NPM packages, this app features a custom-built CSV parser. It safely detects anomalies (duplicate records, missing members, malformed data) and routes them to an interactive UI where the user can resolve the conflicts before committing to the database.
+3. **Enterprise-Grade Security:**
+   The frontend is rigorously protected against Cross-Site Scripting (XSS) attacks. All user-generated content and uploaded spreadsheet data is sanitized via a custom HTML escape utility before being rendered in the DOM.
+4. **Responsive "Fintech" UI:**
+   A sleek, mobile-first design system utilizing modern typography, glassmorphism, and micro-interactions.
 
 ---
 
-## Technical Stack & Architecture
+## 📊 How to use the CSV Importer
 
-- **Backend**: Node.js, Express, SQLite (`sqlite3`).
-- **Frontend**: Single-Page Application (SPA) built using Vanilla HTML5, CSS3 Custom Properties (variables), and Vanilla JS ES Modules.
-- **Styling**: Sleek glassmorphism style, custom color coding for debts/credits, fully responsive layout, and transitions.
+The application allows users to quickly bulk-import historical expenses via CSV. 
+
+### Supported CSV Format
+Your CSV file must include headers and follow this general structure. The parser is highly resilient and will flag any malformed rows for manual review in the UI.
+
+```csv
+date,description,paid_by,amount,currency,split_type,split_with,split_details,notes
+2026-07-01,Groceries,rohan,150.00,INR,equal,,,Weekly groceries
+2026-07-03,Internet Bill,aisha,60.00,USD,percentage,aisha;rohan,aisha 40%;rohan 60%,
+2026-07-05,Dinner Out,raj,3000.00,INR,share,raj;aisha;rohan,raj 2;aisha 1;rohan 1,
+```
+
+### Split Types Explained:
+- `equal`: The total amount is split evenly among all active flatmates.
+- `percentage`: Specify exact percentages for specific users in `split_details`.
+- `share`: Specify weighted shares in `split_details` (e.g. `rohan 2; aisha 1`).
+- `unequal`: Specify exact currency amounts for each user in `split_details`.
+- `settlement`: Used when one user is paying back another user directly.
 
 ---
 
-## AI Collaboration & Attribution
-This project was co-authored with **Antigravity**, a coding assistant designed by Google DeepMind. Details of the AI's contributions, prompts, and corrections can be reviewed in [AI_USAGE.md](file:///c:/Users/Revanth/Desktop/streep/AI_USAGE.md).
+## 🛠️ Local Development Setup
+
+To run this application locally on your machine:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   cd streep
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the server:**
+   ```bash
+   node server.js
+   ```
+   *The SQLite database (`database.sqlite`) will automatically initialize and seed with default tables.*
+
+4. **View the app:**
+   Open `http://localhost:3000` in your browser.
+
+---
+
+## ☁️ Deployment Notes
+
+This repository includes a `vercel.json` configuration file, allowing it to be instantly deployed as Vercel Serverless Functions. 
+
+> **Warning regarding SQLite on Vercel:** Because Vercel Serverless Functions have an ephemeral filesystem, the local `database.sqlite` file will be reset to its initial state whenever the function sleeps. For persistent production data, it is recommended to migrate the SQLite database to a persistent volume (e.g., Render, Railway) or switch the database driver to PostgreSQL.
