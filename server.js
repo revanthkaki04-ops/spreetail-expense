@@ -85,7 +85,22 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // Open database connection
-const db = new sqlite3.Database(path.join(__dirname, 'database.db'));
+let dbPath = path.join(__dirname, 'database.db');
+
+// Vercel Serverless Functions have a read-only filesystem except for /tmp
+if (process.env.VERCEL) {
+  dbPath = path.join('/tmp', 'database.db');
+  // Copy the seeded database to /tmp if it hasn't been copied in this cold-start yet
+  if (!fs.existsSync(dbPath)) {
+    try {
+      fs.copyFileSync(path.join(__dirname, 'database.db'), dbPath);
+    } catch (err) {
+      console.error('Failed to copy database to /tmp:', err);
+    }
+  }
+}
+
+const db = new sqlite3.Database(dbPath);
 
 // Promisify DB methods
 const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
