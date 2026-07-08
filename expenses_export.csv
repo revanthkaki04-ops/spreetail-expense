@@ -1,0 +1,43 @@
+date,description,paid_by,amount,currency,split_type,split_with,split_details,notes
+2026-02-01,February rent,Aisha,48000,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-02-03,Groceries BigBasket,Priya,2340,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-02-05,Wifi bill Feb,Rohan,1199,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-02-08,Dinner at Marina Bites,Dev,3200,INR,equal,Aisha;Rohan;Priya;Dev,,Dev visiting for the weekend
+2026-02-08,dinner - marina bites,Dev,3200,INR,equal,Aisha;Rohan;Priya;Dev,,
+2026-02-10,Electricity Feb,Aisha,1200,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-02-12,Maid salary Feb,Meera,3000,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-02-14,Movie night snacks,priya,640,INR,equal,Aisha;Rohan;Priya,,Meera skipped
+2026-02-15,Cylinder refill,Rohan,899.995,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-02-18,Groceries DMart,Priya S,1875,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-02-20,Aisha birthday cake,Rohan,1500,INR,unequal,Rohan;Priya;Meera,Rohan 700; Priya 400; Meera 400,Aisha not charged obviously
+2026-02-22,House cleaning supplies,,780,INR,equal,Aisha;Rohan;Priya;Meera,,can't remember who paid
+2026-02-25,Rohan paid Aisha back,Rohan,5000,INR,,Aisha,,this is a settlement not an expense??
+2026-02-28,Pizza Friday,Aisha,1440,INR,percentage,Aisha;Rohan;Priya;Meera,Aisha 30%; Rohan 30%; Priya 30%; Meera 20%,percentages might be off
+2026-03-01,March rent,Aisha,48000,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-03-03,Groceries BigBasket,Meera,2810,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-03-05,Wifi bill Mar,Rohan,1199,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-03-08,Goa flights,Aisha,32400,INR,equal,Aisha;Rohan;Priya;Dev,,trip starts!
+2026-03-09,Goa villa booking,Dev,540,USD,equal,Aisha;Rohan;Priya;Dev,,booked on intl site
+2026-03-10,Beach shack lunch,Rohan,84,USD,equal,Aisha;Rohan;Priya;Dev,,
+2026-03-10,Scooter rentals,Priya,3600,INR,share,Aisha;Rohan;Priya;Dev,Aisha 1; Rohan 2; Priya 1; Dev 2,Rohan and Dev took the bigger ones
+2026-03-11,Parasailing,Dev,150,USD,equal,Aisha;Rohan;Priya;Dev;Dev's friend Kabir,,Kabir joined for the day
+2026-03-11,Dinner at Thalassa,Aisha,2400,INR,equal,Aisha;Rohan;Priya;Dev,,
+2026-03-11,Thalassa dinner,Rohan,2450,INR,equal,Aisha;Rohan;Priya;Dev,,Aisha also logged this I think hers is wrong
+2026-03-12,Parasailing refund,Dev,-30,USD,equal,Aisha;Rohan;Priya;Dev,,one slot got cancelled
+2014-03-01,Airport cab,rohan ,1100,INR,equal,Aisha;Rohan;Priya;Dev,,
+2026-03-15,Groceries DMart,Priya,2105,,equal,Aisha;Rohan;Priya;Meera,,forgot to set currency
+2026-03-18,Electricity Mar,Aisha,1450,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-03-20,Maid salary Mar,Meera,3000,INR,equal,Aisha;Rohan;Priya;Meera,,
+2026-03-22,Dinner order Swiggy,Priya,0,INR,equal,Aisha;Rohan;Priya;Meera,,counted twice earlier - fixing later
+2026-03-25,Weekend brunch,Meera,2200,INR,percentage,Aisha;Rohan;Priya;Meera,Aisha 30%; Rohan 30%; Priya 30%; Meera 20%,
+2026-03-28,Meera farewell dinner,Aisha,4800,INR,equal,Aisha;Rohan;Priya;Meera,,Meera moving out Sunday :(
+2026-05-04,Deep cleaning service,Rohan,2500,INR,equal,Aisha;Rohan;Priya,,is this April 5 or May 4? format is a mess
+2026-04-01,April rent,Aisha,48000,INR,share,Aisha;Rohan;Priya,Aisha 2; Rohan 1; Priya 1,Aisha took Meera's room too
+2026-04-02,Groceries BigBasket,Priya,2640,INR,equal,Aisha;Rohan;Priya;Meera,,oops Meera still in the group list
+2026-04-05,Wifi bill Apr,Rohan,1199,INR,equal,Aisha;Rohan;Priya,,
+2026-04-08,Sam deposit share,Sam,15000,INR,equal,Aisha,,Sam moving in! paid Aisha his deposit
+2026-04-10,Housewarming drinks,Sam,3100,INR,equal,Aisha;Rohan;Priya;Sam,,
+2026-04-12,Electricity Apr,Aisha,1380,INR,equal,Aisha;Rohan;Priya;Sam,,
+2026-04-15,Groceries DMart,Sam,1990,INR,equal,Aisha;Rohan;Priya;Sam,,
+2026-04-18,Furniture for common room,Aisha,12000,INR,equal,Aisha;Rohan;Priya;Sam,Aisha 1; Rohan 1; Priya 1; Sam 1,split_type says equal but someone added shares anyway
+2026-04-20,Maid salary Apr,Priya,3000,INR,equal,Aisha;Rohan;Priya;Sam,,

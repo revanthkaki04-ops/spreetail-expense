@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spreetail Shared Expenses App</title>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Shell -->
+  <div id="app" class="hidden">
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+    
+    <!-- Navigation Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-icon"><i data-lucide="split"></i></div>
+        <h2>Spreetail</h2>
+      </div>
+      
+      <!-- Current Group Card -->
+      <div class="group-selector-card">
+        <label>Active Group</label>
+        <div class="select-wrapper">
+          <select id="groupSelect">
+            <!-- Dynamically populated -->
+          </select>
+          <i data-lucide="chevron-down" class="select-chevron"></i>
+        </div>
+        <button id="btnNewGroup" class="btn-text-icon"><i data-lucide="plus"></i> New Group</button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="dashboard">
+          <i data-lucide="layout-dashboard"></i> Dashboard
+        </button>
+        <button class="nav-item" data-tab="ledger">
+          <i data-lucide="file-spreadsheet"></i> Expense Ledger
+        </button>
+        <button class="nav-item" data-tab="members">
+          <i data-lucide="users"></i> Member Lifespans
+        </button>
+        <button class="nav-item" data-tab="importer">
+          <i data-lucide="upload-cloud"></i> CSV Importer
+        </button>
+        <button class="nav-item" id="btnOnboarding">
+          <i data-lucide="help-circle"></i> User Guide
+        </button>
+      </nav>
+
+      <!-- User Profile at Bottom -->
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar" id="userAvatar">A</div>
+          <div class="user-info">
+            <span class="user-name" id="currentUserName">Loading...</span>
+            <span class="user-role">Flatmate</span>
+          </div>
+        </div>
+        <button id="btnLogout" class="btn-icon" aria-label="Logout" title="Logout"><i data-lucide="log-out"></i></button>
+      </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      <!-- Top Action Bar -->
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <button id="btnSidebarToggle" class="btn-icon mobile-only" aria-label="Toggle Menu"><i data-lucide="menu"></i></button>
+          <div class="page-title">
+            <h1 id="tabTitle">Dashboard</h1>
+            <p id="tabSubtitle" class="text-secondary">Summary of flat shared expenses</p>
+          </div>
+        </div>
+        <div class="top-bar-actions">
+          <button id="btnThemeToggle" class="btn-icon" aria-label="Toggle Theme" title="Toggle Theme"><i data-lucide="sun"></i></button>
+          <button id="btnNewExpense" class="btn btn-primary" aria-label="Add Expense"><i data-lucide="plus-circle"></i> <span class="desktop-only">Add Expense</span></button>
+        </div>
+      </header>
+
+      <!-- Dashboard Tab -->
+      <section id="tab-dashboard" class="tab-pane active">
+        <!-- Balance Cards Summary -->
+        <div class="balance-grid">
+          <div class="balance-card owed">
+            <div class="card-icon"><i data-lucide="arrow-down-left"></i></div>
+            <div class="card-data">
+              <span class="card-label">You Owe Total</span>
+              <h2 id="summaryYouOwe">₹0.00</h2>
+            </div>
+          </div>
+          <div class="balance-card credit">
+            <div class="card-icon"><i data-lucide="arrow-up-right"></i></div>
+            <div class="card-data">
+              <span class="card-label">You Are Owed Total</span>
+              <h2 id="summaryYouAreOwed">₹0.00</h2>
+            </div>
+          </div>
+          <div class="balance-card net">
+            <div class="card-icon"><i data-lucide="wallet"></i></div>
+            <div class="card-data">
+              <span class="card-label">Net Balance Status</span>
+              <h2 id="summaryNetBalance">₹0.00</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-layouts">
+          <!-- Aisha's View: Minimize Debts -->
+          <div class="dash-card">
+            <div class="card-header">
+              <div class="header-icon"><i data-lucide="shuffle"></i></div>
+              <div class="header-text">
+                <h3>Settlement Plan</h3>
+                <p class="text-secondary">Aisha's request: Optimized payments ("Who pays whom, how much")</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="settlements-list" id="settlementsList">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Group Members Balances Grid -->
+          <div class="dash-card">
+            <div class="card-header">
+              <div class="header-icon"><i data-lucide="users"></i></div>
+              <div class="header-text">
+                <h3>Flatmate Balances</h3>
+                <p class="text-secondary">Summary of all net balances in this group</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="members-balances" id="membersBalancesList">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Expenses -->
+        <div class="dash-card full-width" style="margin-top: 1.5rem;">
+          <div class="card-header border-bottom">
+            <div class="header-icon"><i data-lucide="list"></i></div>
+            <div class="header-text">
+              <h3>Recent Expenses</h3>
+              <p class="text-secondary">Expenses imported from the CSV</p>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="data-table" id="dashboardExpensesTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Paid By</th>
+                  <th class="text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ledger Tab (Rohan's View: Breakdown of calculations) -->
+      <section id="tab-ledger" class="tab-pane">
+        <div class="dash-card full-width">
+          <div class="card-header border-bottom">
+            <div class="header-icon"><i data-lucide="file-spreadsheet"></i></div>
+            <div class="header-text">
+              <h3>Ledger Breakdown</h3>
+              <p class="text-secondary">Rohan's request: "No magic numbers." Every split transaction contributing to your balance.</p>
+            </div>
+            <button id="btnClearLedger" class="btn btn-outline btn-danger"><i data-lucide="trash-2"></i> Clear Ledger</button>
+          </div>
+          <div class="table-container">
+            <table class="data-table" id="ledgerTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Paid By</th>
+                  <th>Expense Total</th>
+                  <th>Your Share</th>
+                  <th>Net Effect</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="ledgerTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Member Lifespans Tab -->
+      <section id="tab-members" class="tab-pane">
+        <div class="dash-card full-width">
+          <div class="card-header border-bottom">
+            <div class="header-icon"><i data-lucide="calendar"></i></div>
+            <div class="header-text">
+              <h3>Group Membership Timeline</h3>
+              <p class="text-secondary">Sam & Meera's request: Membership dates. Expenses will only split among active flatmates on the expense date.</p>
+            </div>
+          </div>
+          <div class="card-body padding-top-large">
+            <form id="formAddMember" class="inline-form">
+              <div class="form-group">
+                <label for="memberUserId">Flatmate Name/ID</label>
+                <input type="text" id="memberUserId" placeholder="e.g. sam" required>
+              </div>
+              <div class="form-group">
+                <label for="memberJoinedAt">Joined Date</label>
+                <input type="date" id="memberJoinedAt" required>
+              </div>
+              <div class="form-group">
+                <label for="memberLeftAt">Left Date (Optional)</label>
+                <input type="date" id="memberLeftAt" placeholder="Still in flat">
+              </div>
+              <button type="submit" class="btn btn-primary"><i data-lucide="user-plus"></i> Save Membership</button>
+            </form>
+
+            <div class="table-container margin-top-large">
+              <table class="data-table" id="membersTable">
+                <thead>
+                  <tr>
+                    <th>Flatmate ID</th>
+                    <th>Display Name</th>
+                    <th>Joined Date</th>
+                    <th>Left Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="membersTableBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Importer Tab -->
+      <section id="tab-importer" class="tab-pane">
+        <!-- Uploader Panel -->
+        <div class="uploader-container" id="uploaderContainer">
+          <div class="uploader-area" id="dropArea">
+            <i data-lucide="upload-cloud" class="upload-icon"></i>
+            <h3>Drag & Drop your CSV/XLSX file here</h3>
+            <p class="text-secondary">Or click to select a file from your computer</p>
+            <input type="file" id="csvFileInput" accept=".csv, .xlsx" class="hidden">
+            <button class="btn btn-outline" onclick="document.getElementById('csvFileInput').click()">Choose File</button>
+          </div>
+        </div>
+
+        <!-- Anomaly Preview Panel (Hidden by default) -->
+        <div class="importer-preview-container hidden" id="importerPreviewContainer">
+          <div class="preview-actions">
+            <div class="exchange-rate-setting">
+              <label for="usdRateInput">USD to INR Exchange Rate:</label>
+              <input type="number" id="usdRateInput" value="83.0" step="0.1" min="1">
+            </div>
+            <div class="actions-group">
+              <button id="btnCancelImport" class="btn btn-outline">Cancel</button>
+              <button id="btnConfirmImport" class="btn btn-success"><i data-lucide="check-circle"></i> Confirm and Import</button>
+            </div>
+          </div>
+
+          <div class="dash-card full-width">
+            <div class="card-header border-bottom bg-glass">
+              <div class="header-icon warning"><i data-lucide="alert-triangle"></i></div>
+              <div class="header-text">
+                <h3>CSV Pre-Import Anomaly Log</h3>
+                <p class="text-secondary">Meera's request: Approve changes. Clean/resolve anomalies before importing them to the database.</p>
+              </div>
+            </div>
+            
+            <div class="anomaly-rows-list" id="anomalyRowsList">
+              <!-- Anomalies will be dynamically rendered here as interactive cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Import Report Summary Screen -->
+        <div class="import-report-container hidden" id="importReportContainer">
+          <div class="dash-card full-width">
+            <div class="card-header border-bottom bg-glass text-success">
+              <div class="header-icon"><i data-lucide="badge-check"></i></div>
+              <div class="header-text">
+                <h3>Import Report Summary</h3>
+                <p class="text-secondary">Successfully processed and ingested data</p>
+              </div>
+              <button id="btnCloseReport" class="btn btn-primary">Go to Dashboard</button>
+            </div>
+            <div class="card-body">
+              <div class="report-stats">
+                <div class="stat-box">
+                  <h1 id="reportImportedCount">0</h1>
+                  <span>Expenses Ingested</span>
+                </div>
+                <div class="stat-box">
+                  <h1 id="reportSkippedCount">0</h1>
+                  <span>Anomalies Skipped</span>
+                </div>
+              </div>
+              <div class="report-logs-console">
+                <h4>System Import Logs</h4>
+                <pre id="reportLogsConsole"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Login Module (Overlay/Main Screen if not logged in) -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-icon-large"><i data-lucide="split"></i></div>
+        <h1>Spreetail Shared Expenses</h1>
+        <p class="text-secondary" id="loginSubtitle">Sign in to your flat account</p>
+      </div>
+      
+      <div class="login-tabs">
+        <button class="login-tab active" id="tabAuthLogin" data-mode="login">Log In</button>
+        <button class="login-tab" id="tabAuthRegister" data-mode="register">Register</button>
+      </div>
+
+      <div class="login-body">
+        <div id="loginError" class="login-error-message hidden"></div>
+        
+        <div id="authInputsContainer">
+          <div class="form-group hidden" id="groupRegisterName">
+            <label for="authName">Full Name:</label>
+            <input type="text" id="authName" placeholder="e.g. Aisha Kumar">
+          </div>
+          
+          <div class="form-group">
+            <label for="authEmail">Email Address:</label>
+            <input type="email" id="authEmail" placeholder="e.g. aisha@flat.com">
+          </div>
+          
+          <div class="form-group">
+            <label for="authPassword">Password:</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="authPassword" placeholder="••••••••">
+              <button type="button" id="btnTogglePassword" class="btn-toggle-password" aria-label="Toggle password visibility">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="groupOtpVerification" class="hidden">
+          <p class="text-secondary" style="font-size: 0.75rem; margin-bottom: 0.75rem; text-align: left; line-height: 1.4;">
+            We've sent a 6-digit verification code to your email. Enter it below to complete registration:
+          </p>
+          <div class="form-group">
+            <label for="authOtp">Verification Code:</label>
+            <input type="text" id="authOtp" placeholder="6-digit OTP code" maxlength="6" style="text-align: center; letter-spacing: 0.25em; font-family: monospace; font-size: 1.15rem;">
+          </div>
+        </div>
+        
+        <button id="btnLoginSubmit" class="btn btn-primary full-width">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create New Group -->
+  <div id="modalNewGroup" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create New Group</h3>
+        <button class="btn-close-modal"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="inputGroupName">Group Name</label>
+          <input type="text" id="inputGroupName" placeholder="e.g. Goa Trip 2026" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-close-modal">Cancel</button>
+        <button id="btnSubmitGroup" class="btn btn-primary">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Custom Expense / Settlement -->
+  <div id="modalExpense" class="modal-overlay hidden">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3 id="expenseModalTitle">Add Expense</h3>
+        <button class="btn-close-modal"><i data-lucide="x"></i></button>
+      </div>
+      <form id="formExpense">
+        <div class="modal-body">
+          <div class="tabs-sub">
+            <button type="button" class="tab-sub-item active" id="btnSubTabExpense">Expense</button>
+            <button type="button" class="tab-sub-item" id="btnSubTabPayment">Payment Settlement</button>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="expDesc">Description</label>
+              <input type="text" id="expDesc" placeholder="e.g. Milk & Eggs" required>
+            </div>
+            <div class="form-group">
+              <label for="expDate">Date</label>
+              <input type="date" id="expDate" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="expPayer">Paid By</label>
+              <div class="select-wrapper">
+                <select id="expPayer" required></select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="expAmount">Amount</label>
+              <input type="number" id="expAmount" placeholder="0.00" step="0.01" min="0.01" required>
+            </div>
+            <div class="form-group" id="currencyGroup">
+              <label for="expCurrency">Currency</label>
+              <div class="select-wrapper">
+                <select id="expCurrency">
+                  <option value="INR">INR</option>
+                  <option value="USD">USD</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split Settings (Only visible for expense) -->
+          <div id="expenseSplitSettings">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="expSplitType">Split Method</label>
+                <div class="select-wrapper">
+                  <select id="expSplitType">
+                    <option value="equal">Split Equally</option>
+                    <option value="share">Split by Shares</option>
+                    <option value="percentage">Split by Percentages</option>
+                    <option value="unequal">Split Unequally (Fixed Amount)</option>
+                  </select>
+                  <i data-lucide="chevron-down" class="select-chevron"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="split-members-config">
+              <label>Split Details (Toggle participants & configure values)</label>
+              <div id="splitMembersList" class="split-members-list">
+                <!-- Dynamically populated checkbox inputs -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Settlement Recipient Settings (Only visible for payments) -->
+          <div id="paymentSettlementSettings" class="hidden">
+            <div class="form-group">
+              <label for="expRecipient">Paid To (Recipient)</label>
+              <div class="select-wrapper">
+                <select id="expRecipient"></select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="expNotes">Notes (Optional)</label>
+            <textarea id="expNotes" rows="2" placeholder="Add additional details..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline btn-close-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Interactive Spotlight Tour Tooltip -->
+  <div id="tourTooltip" class="tour-tooltip hidden">
+    <h4 id="tourTooltipTitle">Step Title</h4>
+    <p id="tourTooltipText">Step description text goes here.</p>
+    <div class="tour-tooltip-footer">
+      <span id="tourTooltipProgress">1/5</span>
+      <div class="tour-tooltip-btns">
+        <button id="btnTourPrev" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; min-width: 50px;">Back</button>
+        <button id="btnTourNext" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; min-width: 50px;">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
