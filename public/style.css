@@ -1524,3 +1524,43 @@ input:checked + .slider:before {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* --- Inline Action Buttons (Delete/Remove) --- */
+.btn-icon-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  padding: 0;
+}
+
+.btn-icon-sm i,
+.btn-icon-sm svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-danger-ghost {
+  color: var(--text-muted);
+}
+
+.btn-danger-ghost:hover {
+  color: var(--danger);
+  background: var(--danger-subtle);
+}
+
+.btn.btn-danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn.btn-danger:hover {
+  background: var(--danger);
+  color: #fff;
+}

@@ -1364,6 +1364,106 @@ app.post('/api/import-confirm', authenticateJWT, async (req, res) => {
   }
 });
 
+// API: Delete Single Expense (Protected)
+app.delete('/api/expenses/:id', authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await dbRun('BEGIN TRANSACTION');
+    await dbRun(`DELETE FROM expense_splits WHERE expense_id = ?`, [id]);
+    await dbRun(`DELETE FROM expenses WHERE id = ?`, [id]);
+    await dbRun('COMMIT');
+    res.json({ success: true, message: 'Expense deleted successfully' });
+  } catch (err) {
+    await dbRun('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API: Update Expense (Protected)
+app.put('/api/expenses/:id', authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  const { description, paid_by, amount, currency, date, notes, splits } = req.body;
+
+  if (!description || !paid_by || amount === undefined || !date) {
+    return res.status(400).json({ error: 'Missing required expense fields' });
+  }
+
+  try {
+    await dbRun('BEGIN TRANSACTION');
+
+    await dbRun(`
+      UPDATE expenses SET description = ?, paid_by = ?, amount = ?, currency = ?, date = ?, notes = ?
+      WHERE id = ?
+    `, [description, paid_by, amount, currency || 'INR', date, notes || '', id]);
+
+    // Rebuild splits if provided
+    if (splits && splits.length > 0) {
+      await dbRun(`DELETE FROM expense_splits WHERE expense_id = ?`, [id]);
+      for (const split of splits) {
+        await dbRun(`
+          INSERT INTO expense_splits (expense_id, user_id, owed_amount)
+          VALUES (?, ?, ?)
+        `, [id, split.userId, split.owedAmount]);
+      }
+    }
+
+    await dbRun('COMMIT');
+    res.json({ success: true, message: 'Expense updated successfully' });
+  } catch (err) {
+    await dbRun('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API: Remove Member from Group (Protected)
+app.delete('/api/groups/:id/members/:userId', authenticateJWT, async (req, res) => {
+  const { id, userId } = req.params;
+  try {
+    // Check if member has any expenses in this group before removing
+    const hasExpenses = await dbGet(`
+      SELECT COUNT(*) as count FROM expenses WHERE group_id = ? AND paid_by = ?
+    `, [id, userId]);
+
+    const hasSplits = await dbGet(`
+      SELECT COUNT(*) as count FROM expense_splits es
+      JOIN expenses e ON es.expense_id = e.id
+      WHERE e.group_id = ? AND es.user_id = ?
+    `, [id, userId]);
+
+    await dbRun(`DELETE FROM group_memberships WHERE group_id = ? AND user_id = ?`, [id, userId]);
+    
+    res.json({ 
+      success: true, 
+      message: `Member ${userId} removed from group`,
+      hadExpenses: hasExpenses.count > 0,
+      hadSplits: hasSplits.count > 0,
+      warning: (hasExpenses.count > 0 || hasSplits.count > 0) 
+        ? `Note: ${userId} still has ${hasExpenses.count} expenses and ${hasSplits.count} split entries in this group's history.`
+        : null
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API: Delete Group (Protected)
+app.delete('/api/groups/:id', authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await dbRun('BEGIN TRANSACTION');
+    // Delete all related data
+    await dbRun(`DELETE FROM expense_splits WHERE expense_id IN (SELECT id FROM expenses WHERE group_id = ?)`, [id]);
+    await dbRun(`DELETE FROM expenses WHERE group_id = ?`, [id]);
+    await dbRun(`DELETE FROM group_memberships WHERE group_id = ?`, [id]);
+    await dbRun(`DELETE FROM groups WHERE id = ?`, [id]);
+    await dbRun('COMMIT');
+    res.json({ success: true, message: 'Group deleted successfully' });
+  } catch (err) {
+    await dbRun('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Start Server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

@@ -395,6 +395,11 @@ function renderDashboard() {
           </td>
           <td>${escapeHTML(e.payer_name)}</td>
           <td class="text-right"><strong>${escapeHTML(e.currency)} ${e.amount.toFixed(2)}</strong></td>
+          <td>
+            <button class="btn-icon-sm btn-danger-ghost" onclick="deleteExpense(${e.id})" title="Delete expense">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </td>
         `;
         recentExpTable.appendChild(row);
       });
@@ -455,6 +460,11 @@ function renderLedger() {
       <td>₹${owedAmount.toFixed(2)}</td>
       <td class="${netColorClass} font-weight-bold">${netText}</td>
       <td class="text-secondary" style="font-size: 0.8rem;">${safeNotes}</td>
+      <td>
+        <button class="btn-icon-sm btn-danger-ghost" onclick="deleteExpense(${e.id})" title="Delete expense">
+          <i data-lucide="trash-2"></i>
+        </button>
+      </td>
     `;
     tbody.appendChild(row);
   });
@@ -482,8 +492,9 @@ function renderMembersTable() {
           ${active ? 'Active' : 'Moved Out/Inactive'}
         </span>
       </td>
-      <td>
+      <td style="display: flex; gap: 0.25rem;">
         <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="editMember('${escapeHTML(m.user_id)}', '${escapeHTML(m.joined_at || '')}', '${escapeHTML(m.left_at || '')}')"><i data-lucide="edit"></i> Edit</button>
+        <button class="btn btn-outline btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="removeMember('${escapeHTML(m.user_id)}')"><i data-lucide="user-minus"></i> Remove</button>
       </td>
     `;
     tbody.appendChild(row);
@@ -498,6 +509,40 @@ window.editMember = (userId, joinedAt, leftAt) => {
   
   // Navigate/scroll to form
   document.getElementById('memberUserId').focus();
+};
+
+window.deleteExpense = async (expenseId) => {
+  if (!confirm('Are you sure you want to delete this expense? This cannot be undone.')) return;
+  try {
+    const res = await authFetch(`/api/expenses/${expenseId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      await loadBalances();
+    } else {
+      alert(`Error: ${data.error || 'Failed to delete expense'}`);
+    }
+  } catch (err) {
+    alert(`Error deleting expense: ${err.message}`);
+  }
+};
+
+window.removeMember = async (userId) => {
+  if (!confirm(`Remove "${userId}" from this group? Their expense history will be preserved.`)) return;
+  try {
+    const res = await authFetch(`/api/groups/${state.activeGroup}/members/${userId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      if (data.warning) {
+        alert(data.warning);
+      }
+      await loadMembers();
+      await loadBalances();
+    } else {
+      alert(`Error: ${data.error || 'Failed to remove member'}`);
+    }
+  } catch (err) {
+    alert(`Error removing member: ${err.message}`);
+  }
 };
 
 // --- Add Manual Expense / Settlement Forms ---
@@ -874,13 +919,8 @@ function setupEventListeners() {
     });
   }
 
-  // Add Expense Button Stub
-  const btnNewExpense = document.getElementById('btnNewExpense');
-  if (btnNewExpense) {
-    btnNewExpense.addEventListener('click', () => {
-      alert("Feature Coming Soon: Manual expense creation is under development! Please use the CSV Importer in the meantime.");
-    });
-  }
+  // Add Expense Button — opens the expense/settlement modal
+  // (Modal form handles both manual expenses and payment settlements)
 
   // Nav Tab Buttons
   document.querySelectorAll('.nav-item').forEach(btn => {
